@@ -27,8 +27,8 @@ def get_unix_ips():
     sp = subprocess.Popen(["ifconfig"], stdout=subprocess.PIPE,
             universal_newlines=True)
     sp.wait()
-    matches = re.finditer(r'^\w.*?:.*\n\s+inet (?P<ip>(\d{1,3}\.){3}\d{1,3})',
-            ''.join(sp.stdout.readlines()), flags=re.M)
+    matches = re.finditer(r'^\w.*?:.*?\s+inet (?P<ip>(?:\d{1,3}\.){3}\d{1,3})',
+            ''.join(sp.stdout.readlines()), flags=re.DOTALL | re.MULTILINE)
     return [m.group('ip') for m in matches]
 
 
