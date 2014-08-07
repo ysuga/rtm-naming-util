@@ -7,22 +7,18 @@ import subprocess
 import sys
 
 def get_win32_ips():
-    # Only works in Python 2.7
+    # Only works in Python 2.7 or greater
     #cmd_output = subprocess.check_output(["ipconfig"])
     sp = subprocess.Popen(["ipconfig"], stdout=subprocess.PIPE,
             universal_newlines=True)
     sp.wait()
-    ipv4_key = 'IPv4 Address'
-    ipv4s = []
-    for line in sp.stdout:
-        if line.find(ipv4_key) < 0:
-            continue
-        ipv4s.append(line[line.find(':')+1:].strip())
-    return ipv4s
+    matches = re.finditer(r'^\w.*?:.*?\s+IPv4 Address[\. ]+: (?P<ip>(?:\d{1,3}\.){3}\d{1,3})',
+            ''.join(sp.stdout.readlines()), flags=re.DOTALL | re.MULTILINE)
+    return [m.group('ip') for m in matches]
 
 
 def get_unix_ips():
-    # Only works in Python 2.7
+    # Only works in Python 2.7 or greater
     #cmd_output = subprocess.check_output(["ifconfig"])
     sp = subprocess.Popen(["ifconfig"], stdout=subprocess.PIPE,
             universal_newlines=True)
@@ -37,7 +33,7 @@ if len(sys.argv) > 1:
 else:
     port = ''
 
-if sys.platform is 'win32' or sys.platform is 'cygwin':
+if sys.platform == 'win32' or sys.platform == 'cygwin':
     ips = get_win32_ips()
 else:
     ips = get_unix_ips()
